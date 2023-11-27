@@ -124,8 +124,16 @@ translate([encoder_d/2+9,-3.25,4.5])rotate([0,-90,0])color("Black")
 	optocouple();
 	*/
 
+module slide() {
+	r = 122;
+	difference() {
+		translate([-65,0,-1])cylinder(h=2,r=122);
+		translate([-69,0,-1])cylinder(h=2,r=122);
+	}
+}
+
 module arm() {
-	arm_length = 112;
+	arm_length = 122;
 	arm_width = 15;
 	arm_height = 2;
 	difference() {
@@ -134,10 +142,21 @@ module arm() {
 		translate([-69,0,-1])cylinder(h=arm_height, d=arm_width);
 	}
 		translate([-69,0,-1])cylinder(h=arm_height, d=4);
+		slide();
+	}
+}
+
+module rail() {
+	difference() {
+		translate([45,-25,0])cube([20,50,5]);
+		slide();
 	}
 }
 
 union() {
 	arm();
+	//color("Silver")slide();
 	opto_with_washer();
 }
+
+rail();
