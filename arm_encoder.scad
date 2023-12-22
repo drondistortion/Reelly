@@ -1,4 +1,4 @@
-$fn=50;
+$fn=150;
 $fa=0.1;
 // inner stuff
 washer_h = 3; //mm
@@ -91,16 +91,17 @@ module opto_holder() {
 		// arm
 		translate([arm_width,-arm_width/2,0])cube([arm_length,arm_width,1]);
 		// holder
-		translate([arm_length+arm_width-2,-arm_width/2,0])cube([3,arm_width, opto_lenght+flange_h+5]);
+		translate([arm_length+arm_width-2,-arm_width/2,0])cube([6,arm_width, opto_lenght+flange_h+5]);
 	}
 }
 
 module opto_legs() {
 	legs_d = 1.2;
-	cylinder(h=5, d=legs_d);
-	translate([0,2.5,0])cylinder(h=5, d=legs_d);
-	translate([10.2,2.5,0])cylinder(h=5, d=legs_d);
-	translate([10.2,0,0])cylinder(h=5, d=legs_d);
+	legs_l = 7;
+	cylinder(h=legs_l, d=legs_d);
+	translate([0,2.5,0])cylinder(h=legs_l, d=legs_d);
+	translate([10.2,2.5,0])cylinder(h=legs_l, d=legs_d);
+	translate([10.2,0,0])cylinder(h=legs_l, d=legs_d);
 }
 
 /*
@@ -111,12 +112,104 @@ color("RoyalBlue")translate([0,0,washer_h-1])
 
 // draw optocouple holder
 module opto_with_washer() {
-color("LightSlateGray")difference() {
-	opto_holder();
-	translate([encoder_d/2+1+flange_size/2+7,-1.25,6])rotate([0,-90,0])
-		opto_legs();
+	color("LightSlateGray")difference() {
+		opto_holder();
+		translate([encoder_d/2+1+flange_size/2+10,-1.25,6])rotate([0,-90,0])
+			opto_legs();
+	}
 }
+
+arm_length = 100;
+arm_height = 7.5;
+
+module slide() {
+	this_r = arm_length;
+	difference() {
+		translate([-58,0,-arm_height+1])cylinder(h=arm_height,r=this_r);
+		translate([-62,0,-arm_height+1])cylinder(h=arm_height,r=this_r);
+	}
 }
+
+module spring_ring() {
+	difference() {
+		cylinder(h=3, d=6);
+		cylinder(h=3, d=3);
+	}
+}
+
+module arm() {
+	arm_width = 15;
+	difference() {
+		union() {
+			translate([25,arm_width/2,-3.5])rotate([0,90,0])
+				spring_ring();
+			translate([-60,-arm_width/2,-arm_height+1])
+				cube([arm_length, arm_width, arm_height]);
+			translate([-60,0,-arm_height+1])
+				cylinder(h=arm_height, d=arm_width);
+		}
+		translate([-60,0,-arm_height+1])cylinder(h=arm_height, d=4.2);
+		slide();
+
+		// guide
+		translate([39,0,1+2])
+			cube(15, true);
+		//translate([39,0,-arm_height-5.5]) cube(15, true);
+		translate([-10,0,-10])
+			cylinder(h=20, d=screw_d);
+		translate([-10,0,-10])
+			cylinder(h=10, d=7.9, $fn=6);
+	}
+}
+
+module screw() {
+	shaft_d = 3;
+	head_d = 6;
+	union() {
+		cylinder(h=10,d=shaft_d);
+		hull() {
+			linear_extrude(0.1)
+				circle(d=head_d);
+			translate([0,0,head_d-shaft_d])
+				linear_extrude(0.1)circle(d=shaft_d);
+		}
+	}
+}
+
+module rail() {
+	rail_r = arm_length;
+	rail_w = 43;
+	common_x = 64;
+	_h = 3.2;
+	union() {
+		difference() {
+			translate([54,-rail_w/2,-arm_height+1])cube([20,rail_w,_h]);
+			translate([-33,0,-arm_height+1])cylinder(h=arm_height+0.2,r=rail_r);
+		}
+		translate([common_x,-rail_w/2,-arm_height+1])cube([10,2,_h]);
+		translate([common_x,rail_w/2-2,-arm_height+1])cube([10,2,_h]);
+		translate([common_x,-rail_w/2,-arm_height+1])cube([10,rail_w,0.8]);
+		translate([common_x,-rail_w/2,-arm_height+4.2])cube([10,rail_w,0.8]);
+	}
+}
+
+
+module rail_with_skrewholes() {
+	difference() {
+		rail();
+		translate([70,-15,-2.5])rotate([0,180,0])screw();
+		translate([70,15,-2.5])rotate([0,180,0])screw();
+	}
+}
+rail_with_skrewholes();
+
+/*
+union() {
+	arm();
+	//color("Silver")slide();
+	translate([-10,0,0])rotate([0,0,-6])opto_with_washer();
+}
+*/
 
 /*
 // draw optocouple
@@ -124,39 +217,4 @@ translate([encoder_d/2+9,-3.25,4.5])rotate([0,-90,0])color("Black")
 	optocouple();
 	*/
 
-module slide() {
-	r = 122;
-	difference() {
-		translate([-65,0,-1])cylinder(h=2,r=122);
-		translate([-69,0,-1])cylinder(h=2,r=122);
-	}
-}
 
-module arm() {
-	arm_length = 122;
-	arm_width = 15;
-	arm_height = 2;
-	difference() {
-	union() {
-		translate([-69,-arm_width/2,-1])cube([arm_length, arm_width, arm_height]);
-		translate([-69,0,-1])cylinder(h=arm_height, d=arm_width);
-	}
-		translate([-69,0,-1])cylinder(h=arm_height, d=4);
-		slide();
-	}
-}
-
-module rail() {
-	difference() {
-		translate([45,-25,0])cube([20,50,5]);
-		slide();
-	}
-}
-
-union() {
-	arm();
-	//color("Silver")slide();
-	opto_with_washer();
-}
-
-rail();
