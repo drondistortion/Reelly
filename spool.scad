@@ -1,7 +1,7 @@
 $fn = 50;
 $fa = 0.1;
 module spool_base() {
-	sf = 1.018;
+	sf = 1.018; // scale factor
 	union() {
 		scale([sf,sf,sf])import("fh_spool.stl");
 		difference() {
@@ -19,5 +19,26 @@ module spool_top() {
 	}
 }
 
+module platform() {
+	difference() {
+		spool_top();
+		cutout();
+	}
+}
+
+module cutout() {
+	difference() {
+		cylinder(h=10, r=80);
+		cylinder(h=11, r=42);
+	}
+}
+
+module spoolWithOffset() {
+	union() {
+		spool_top();
+		translate([0,0,2])platform();
+	}
+}
+
 //spool_base();
-spool_top();
+spoolWithOffset();

@@ -42,14 +42,15 @@ encoder_d = 10*full_rotation_length/PI-rubber_thickness*2;
 echo(encoder_d);
 module encoderMainShaft() {
 	union() {
-		translate([0,0,flange_h])cylinder(h=encoder_h, d=encoder_d);
-		bottom_flange();
+		//translate([0,0,flange_h])cylinder(h=encoder_h, d=encoder_d);
+		translate([0,0,flange_h])crown($fn=150);
+		//bottom_flange();
 		top_flange();
 	}
 }
 
 module bottom_flange() {
-	cylinder(h=flange_h, d=encoder_d+flange_size);
+	cylinder(h=flange_h, d=encoder_d);
 }
 
 module top_flange() {
@@ -103,12 +104,20 @@ module opto_legs() {
 	translate([10.2,0,0])cylinder(h=5, d=legs_d);
 }
 
-/*
+module crown() {
+	translate([0,0,encoder_h/2-0.5]) difference() {
+		cut_h = 16;
+		sphere(d=encoder_d);
+		translate([0,0,encoder_h/2+0.5])cylinder(h=cut_h, d=40);
+		translate([0,0,-cut_h-encoder_h/2-0.5])cylinder(h=cut_h, d=40);
+	}
+}
+
 // draw encoder
 color("RoyalBlue")translate([0,0,washer_h-1])
 	encoder();
-	*/
 
+/*
 // draw optocouple holder
 color("LightSlateGray")difference() {
 	opto_holder();
@@ -116,10 +125,7 @@ color("LightSlateGray")difference() {
 		opto_legs();
 }
 
-/*
 // draw optocouple
 translate([encoder_d/2+9,-3.25,4.5])rotate([0,-90,0])color("Black")
 	optocouple();
-	*/
-
-
+*/
