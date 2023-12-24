@@ -1,6 +1,8 @@
 #include <LiquidCrystal_I2C.h> // 1.1.4
 #include <Button2.h> // 2.2.4
 
+#define MOTOR_PIN A3
+
 #define BTN_BACK 8
 #define BTN_FORW 9
 #define BTN_PLAY 10
