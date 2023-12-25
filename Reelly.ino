@@ -3,14 +3,16 @@
 
 #define MOTOR_PIN A3
 
-#define BTN_BACK 8
-#define BTN_FORW 9
+#define BTN_GND 8
+#define BTN_BACK 9
 #define BTN_PLAY 10
+#define BTN_FORW 11
 #define NBUTTONS 3
+
+constexpr float NOTCH_DISTANCE = 0.02;
 
 unsigned g_target_amount = 1;
 float g_current_amount = 0.0;
-constexpr float hyst = 0.02;
 
 typedef enum {
 	MAIN,
@@ -21,7 +23,7 @@ state_t menu_state = MAIN;
 
 Button2 btns[NBUTTONS];
 
-volatile unsigned long notch_counter = 0;
+volatile unsigned long g_notch_counter = 0;
 
 LiquidCrystal_I2C disp(0x27, 20, 4);
 
@@ -58,11 +60,13 @@ void initCounter()
 
 void fallingInterrupt()
 {
-	notch_counter++;
+	g_notch_counter++;
 }
 
 void initButtons()
 {
+	pinMode(BTN_GND, OUTPUT);
+	digitalWrite(BTN_GND, LOW);
 
 	btns[0].begin(BTN_BACK, INPUT_PULLUP);
 	btns[1].begin(BTN_PLAY, INPUT_PULLUP);
@@ -125,6 +129,7 @@ void printCounting()
 
 void startWinding()
 {
+	g_notch_counter = 0;
 	menu_state = COUNTING;
 	startMotor();
 }
@@ -132,10 +137,10 @@ void startWinding()
 void handleWinding()
 {
 	if (menu_state == COUNTING)
-		g_current_amount = (float)notch_counter*0.02;
+		g_current_amount = (float)g_notch_counter*NOTCH_DISTANCE;
 
-	if (int(g_current_amount+hyst) == g_target_amount) {
-		notch_counter = 0;
+	if (int(g_current_amount+NOTCH_DISTANCE) == g_target_amount) {
+		g_notch_counter = 0;
 		menu_state = MAIN;
 		stopWinding();	
 	}
