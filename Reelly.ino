@@ -1,7 +1,7 @@
 #include <LiquidCrystal_I2C.h> // 1.1.4
 #include <Button2.h> // 2.2.4
 
-#define MOTOR_PIN A3
+#define MOTOR_PIN A2
 
 #define BTN_GND 8
 #define BTN_BACK 9
@@ -9,10 +9,10 @@
 #define BTN_FORW 11
 #define NBUTTONS 3
 
-constexpr float NOTCH_DISTANCE = 0.02;
+constexpr unsigned NOTCH_DISTANCE = 20;
 
-unsigned g_target_amount = 1;
-float g_current_amount = 0.0;
+unsigned g_target_amount = 1000;
+unsigned long g_current_amount = 0;
 
 typedef enum {
 	MAIN,
@@ -81,13 +81,13 @@ void btnHandler(Button2& btn)
 {
 	switch (btn.getPin()) {
 		default: break;
-		case BTN_FORW: g_target_amount++; break;
-		case BTN_BACK: g_target_amount--; break;
+		case BTN_FORW: g_target_amount += 1000; break;
+		case BTN_BACK: g_target_amount -= 1000; break;
 		case BTN_PLAY: startWinding(); break;
 	}
 
 	if (g_target_amount == 0)
-		g_target_amount = 1;
+		g_target_amount = 1000;
 }
 
 void handleDisplay()
@@ -112,7 +112,7 @@ void printSelection()
 	disp.print("Amount:");
 	disp.setCursor(0,1);
 	disp.print(g_target_amount);
-	disp.print(" m");
+	disp.print(" mm        ");
 }
 
 void printCounting()
@@ -120,11 +120,11 @@ void printCounting()
 	disp.setCursor(0,0);
 	disp.print("Target: ");
 	disp.print(g_target_amount);
-	disp.print(" m");
+	disp.print(" mm");
 	disp.setCursor(0,1);
 	disp.print("Got: ");
-	disp.print(g_current_amount, 2);
-	disp.print(" Meters");
+	disp.print(g_current_amount);
+	disp.print(" mm        ");
 }
 
 void startWinding()
@@ -137,9 +137,9 @@ void startWinding()
 void handleWinding()
 {
 	if (menu_state == COUNTING)
-		g_current_amount = (float)g_notch_counter*NOTCH_DISTANCE;
+		g_current_amount = g_notch_counter*NOTCH_DISTANCE;
 
-	if (int(g_current_amount+NOTCH_DISTANCE) == g_target_amount) {
+	if (g_current_amount+NOTCH_DISTANCE == g_target_amount) {
 		g_notch_counter = 0;
 		menu_state = MAIN;
 		stopWinding();	
